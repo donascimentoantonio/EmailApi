@@ -1,0 +1,17 @@
+services:
+  emailmanagement.api:
+    image: ${DOCKER_REGISTRY-}emailmanagementapi
+    build:
+      context: .
+      dockerfile: EmailManagement.API/Dockerfile
+  postgres:
+    image: postgres:latest  
+    container_name: emaildb_postegres  
+    environment:
+      POSTGRES_USER: admin  
+      POSTGRES_PASSWORD: 1234567
+      POSTGRES_DB: email_db  
+    volumes:
+      - ./data:/var/lib/postgresql/data  
+    ports:
+      - "5432:5432"  
