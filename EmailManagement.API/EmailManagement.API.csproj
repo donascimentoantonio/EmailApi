@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\EmailManagement.IoC\EmailManagement.IoC.csproj" />
     <ProjectReference Include="..\EmailManagement.Domain\EmailManagement.Domain.csproj" />
   </ItemGroup>
 

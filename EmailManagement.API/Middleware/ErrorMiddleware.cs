@@ -1,16 +1,19 @@
 ﻿using EmailManagement.Api.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
+using System;
 
 namespace EmailManagement.Api.Middleware
 {
     public class ErrorMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorMiddleware> _logger;
 
-        public ErrorMiddleware(RequestDelegate next)
+        public ErrorMiddleware(RequestDelegate next, ILogger<ErrorMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext httpContext)
@@ -30,11 +33,11 @@ namespace EmailManagement.Api.Middleware
             catch (Exception ex)
             {
                 await HandleErrorAsync(httpContext, ex);
+                _logger.LogError(ex, "Exception occurred: {Message}", ex.Message);
             }
         }
 
         private static async Task HandleErrorAsync(HttpContext context, Exception ex)
-
         {
 
             var statusCode = StatusCodes.Status500InternalServerError;
