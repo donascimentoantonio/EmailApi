@@ -1,4 +1,4 @@
 ﻿namespace EmailManagement.Domain.Models.Email
 {
-    public record Atachment(string File, string FileName, string FileExtension);
+    public record Atachment(Guid Id, string File, string FileName, string FileExtension, string EmailId);
 }
