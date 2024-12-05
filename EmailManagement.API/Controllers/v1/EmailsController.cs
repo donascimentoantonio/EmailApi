@@ -20,17 +20,6 @@ namespace EmailManagement.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Faz a persistencia do email e envia caso necessário
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("salvar-unico")]
-        public async Task<ActionResult<EmailPostParametersResponse>> SaveEmail(EmailPostParametersRequest request)
-        {
-            return Ok(await _emailService.CreateEmailAsync(request));
-        }
-
-        /// <summary>
         /// Faz a persistência de múltiplos e-mails e os envia caso necessário.
         /// </summary>
         /// <param name="requests">Lista de requisições de e-mail</param>

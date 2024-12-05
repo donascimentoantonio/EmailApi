@@ -22,17 +22,6 @@ namespace EmailManagement.Application.Services
             _mapper = mapper;
         }
 
-        // Criação de um novo email
-        public async Task<EmailPostParametersResponse> CreateEmailAsync(EmailPostParametersRequest request)
-        {
-            var email = _mapper.Map<Email>(request);
-            email.Id = new EmailId(Guid.NewGuid());
-            await _emailRepository.SaveAsync(email);
-
-            var response = _mapper.Map<EmailPostParametersResponse>(email);
-            return response;
-        }
-
         public async Task<IEnumerable<EmailPostParametersResponse>> SendEmailsAsync(List<EmailPostParametersRequest> requests)
         {
             var responses = new List<EmailPostParametersResponse>();

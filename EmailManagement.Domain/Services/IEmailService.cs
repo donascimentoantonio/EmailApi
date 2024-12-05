@@ -8,7 +8,6 @@ namespace EmailManagement.Domain.Services
 {
     public interface IEmailService
     {
-        Task<EmailPostParametersResponse> CreateEmailAsync(EmailPostParametersRequest request);
         Task<IEnumerable<EmailPostParametersResponse>> SendEmailsAsync(List<EmailPostParametersRequest> requests);
         Task<EmailPostParametersResponse> UpdateEmailAsync(Guid emailId, EmailPostParametersRequest request);
         Task<bool> DeleteEmailAsync(Guid emailId);
