@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using System;
 
-namespace EmailManagement.Api.Middleware
+namespace EmailManagement.Api.Middlewares
 {
     public class ErrorMiddleware
     {

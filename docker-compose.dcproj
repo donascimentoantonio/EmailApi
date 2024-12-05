@@ -4,7 +4,7 @@
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
     <DockerPublishLocally>False</DockerPublishLocally>
-    <ProjectGuid>34342239-8ee2-4142-af22-a0ef8085ca96</ProjectGuid>
+    <ProjectGuid>8ee73e78-dfe5-4bcb-86b3-f902cf6a5dc9</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
     <DockerServiceName>emailmanagement.api</DockerServiceName>

@@ -14,6 +14,11 @@ namespace EmailManagement.Infrastructure.Repositories
             _context = context;
         }
 
+        public void Add(Email email)
+        {
+            _context.Emails.Add(email);
+        }
+
         public async Task<Email?> GetByIdAsync(EmailId id)
         {
             return await _context.Emails
@@ -45,7 +50,8 @@ namespace EmailManagement.Infrastructure.Repositories
             return await _context.Emails
                 .Include(e => e.Atachments) // Inclui os anexos
                 .Where(e => e.SentAt >= startDate && e.SentAt <= endDate)
-                .ToListAsync();
+                 .OrderBy(e => e.SentAt)
+                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Email>> SearchAsync(Expression<Func<Email, bool>> predicate)
@@ -54,6 +60,32 @@ namespace EmailManagement.Infrastructure.Repositories
                 .Include(e => e.Atachments)
                 .Where(predicate)
                 .ToListAsync();
+        }
+
+        public async Task<(IEnumerable<Email>, int)> SearchWithPaginationAsync(
+          Expression<Func<Email, bool>> predicate,
+          int pageNumber,
+          int pageSize)
+        {
+            try
+            {
+                var query = _context.Emails
+                    .Include(e => e.Atachments)
+                    .Where(predicate);
+
+                var totalCount = await query.CountAsync();
+
+                var emails = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return (emails, totalCount);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error executing paginated search.", ex);
+            }
         }
     }
 }

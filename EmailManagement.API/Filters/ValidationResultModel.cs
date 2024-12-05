@@ -24,7 +24,7 @@ namespace EmailManagement.Api.Filters
         {
             StatusCode = StatusCodes.Status400BadRequest;
 
-            var key = modelState.FirstOrDefault(p => !p.Key.Equals(string.Empty!) && p.Value.ValidationState.Equals(ModelValidationState.Invalid)).Key;
+            var key = modelState.FirstOrDefault(p => !p.Key.Equals(string.Empty!) && p.Value!.ValidationState.Equals(ModelValidationState.Invalid)).Key;
 
             Error = new ObjectError(ReasonPhrases.GetReasonPhrase(StatusCode), new ObjectDetailsError(0, $"{key} invalido"));
         }

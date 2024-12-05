@@ -4,7 +4,7 @@ namespace EmailManagement.Domain.Models.Email
 {
     public class Email
     {
-        public EmailId Id { get; private set; }
+        public EmailId Id { get; set; }
         public string Sender { get; set; }
         public List<string> Recipients { get; set; }
         public string Subject { get; set; }

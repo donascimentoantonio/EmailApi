@@ -4,17 +4,17 @@ services:
     build:
       context: .
       dockerfile: EmailManagement.API/Dockerfile
-  postgres:
-    image: postgres:latest  
-    container_name: emaildb_postegres  
+  email.db: 
+    image: postgres:latest
+    container_name: emailm-db
     environment:
-      POSTGRES_USER: admin  
-      POSTGRES_PASSWORD: 1234567
-      POSTGRES_DB: email_db  
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: emailm
     volumes:
-      - ./data:/var/lib/postgresql/data  
+       - ./postgres-data:/var/lib/postgresql/data 
     ports:
-      - "5432:5432"  
+      - "5432:5432"
   redis:
     image: redis:latest
     ports:
@@ -22,6 +22,6 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-
 volumes:
   redis_data:
+  pgdata: {}
