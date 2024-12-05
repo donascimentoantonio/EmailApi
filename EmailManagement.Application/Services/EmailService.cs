@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using EmailManagement.Domain.Dtos.v1.Request;
+using EmailManagement.Domain.Dtos.v1.Response;
+using EmailManagement.Domain.Enum;
 using EmailManagement.Domain.Models.Email;
 using EmailManagement.Domain.Services;
 using EmailManagement.Infrastructure.Repositories;
@@ -21,32 +23,92 @@ namespace EmailManagement.Application.Services
         }
 
         // Criação de um novo email
-        public async Task<Email> CreateEmailAsync(EmailPostParametersRequest request)
+        public async Task<EmailPostParametersResponse> CreateEmailAsync(EmailPostParametersRequest request)
         {
             var email = _mapper.Map<Email>(request);
-            email.Id = new EmailId(Guid.NewGuid()); 
+            email.Id = new EmailId(Guid.NewGuid());
             await _emailRepository.SaveAsync(email);
-            return email;
+
+            var response = _mapper.Map<EmailPostParametersResponse>(email);
+            return response;
         }
 
+        public async Task<IEnumerable<EmailPostParametersResponse>> SendEmailsAsync(List<EmailPostParametersRequest> requests)
+        {
+            var responses = new List<EmailPostParametersResponse>();
+
+            foreach (var request in requests)
+            {
+                var email = Email.Create(request.Sender, request.Recipients, request.Subject, request.Body, request.Atachments?.ToList());
+
+                // Salva o e-mail no banco
+                await _emailRepository.SaveAsync(email);
+
+                // Se a flag 'Send' estiver marcada, tenta enviar o e-mail
+                if (request.Send)
+                {
+                    //await SendEmailAsync(email); // Lógica de envio do e-mail
+
+                    email.MarkAsSent();
+                }
+                else
+                {
+                    email.MarkAsPending();
+                }
+
+                await _emailRepository.UpdateAsync(email);
+
+                // Adiciona a resposta com o status do e-mail
+                var response = new EmailPostParametersResponse
+                {
+                    Id = email.Id.ToString(),
+                    Status = email.Status
+                };
+                responses.Add(response);
+            }
+
+            return responses;
+        }
         public Task<bool> DeleteEmailAsync(Guid emailId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Email?> GetEmailByIdAsync(Guid emailId)
+        public Task<EmailGetParametersResponse?> GetEmailByIdAsync(Guid emailId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Email>> GetEmailsByDateAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<EmailGetParametersResponse>> GetEmailsByDateAsync(DateTime startDate, DateTime endDate)
         {
-            throw new NotImplementedException();
+            // Chama o repositório para buscar os e-mails
+            var emails = await _emailRepository.GetEmailsByDateAsync(startDate, endDate);
+
+            // Mapeia os e-mails para a resposta
+            var response = _mapper.Map<IEnumerable<EmailGetParametersResponse>>(emails);
+
+            return response;
         }
 
-        public Task<IEnumerable<Email>> SearchEmailsAsync(Expression<Func<Email, bool>> predicate)
+        public async Task<IEnumerable<EmailGetParametersResponse>> SearchEmailsAsync(SearchEmailFilterRequest filter)
         {
-            throw new NotImplementedException();
+            // Cria o predicado de busca dinâmico baseado nos parâmetros
+            Expression<Func<Email, bool>> predicate = email =>
+               (string.IsNullOrEmpty(filter.Sender) || email.Sender.Contains(filter.Sender)) &&
+               (!filter.Status.HasValue || email.Status == filter.Status) &&
+               (filter.Recipients == null || email.Recipients.Any(r => filter.Recipients.Contains(r))) &&
+               (string.IsNullOrEmpty(filter.Subject) || email.Subject.Contains(filter.Subject)) &&
+               (string.IsNullOrEmpty(filter.Body) || email.Body.Contains(filter.Body)) &&
+               (!filter.SentAfter.HasValue || email.SentAt >= filter.SentAfter) &&
+               (!filter.SentBefore.HasValue || email.SentAt <= filter.SentBefore) &&
+               (!filter.MinAttempts.HasValue || email.Attempts >= filter.MinAttempts) &&
+               (!filter.MaxAttempts.HasValue || email.Attempts <= filter.MaxAttempts);
+
+            var emails = await _emailRepository.SearchAsync(predicate);
+
+            var response = _mapper.Map<IEnumerable<EmailGetParametersResponse>>(emails);
+
+            return response;
         }
 
         public Task<(IEnumerable<Email>, int)> SearchEmailsWithPaginationAsync(Expression<Func<Email, bool>> predicate, int pageNumber, int pageSize)
@@ -54,9 +116,10 @@ namespace EmailManagement.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Email> UpdateEmailAsync(Guid emailId, EmailPostParametersRequest request)
+        public Task<EmailPostParametersResponse> UpdateEmailAsync(Guid emailId, EmailPostParametersRequest request)
         {
             throw new NotImplementedException();
         }
+
     }
 }

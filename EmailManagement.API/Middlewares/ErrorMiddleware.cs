@@ -46,8 +46,6 @@ namespace EmailManagement.Api.Middlewares
 
             var errorResponse = new ErrorResponse(statusCode, message);
 
-
-
             context.Response.ContentType = "application/json";
 
             context.Response.StatusCode = statusCode;
