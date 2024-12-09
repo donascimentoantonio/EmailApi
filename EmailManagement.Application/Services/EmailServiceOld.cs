@@ -10,26 +10,24 @@ using System.Linq.Expressions;
 
 namespace EmailManagement.Application.Services
 {
-    public class EmailService : IEmailService
+    public class EmailServiceOld
     {
         private readonly IEmailRepository _emailRepository;
         private readonly IMapper _mapper;
+        private readonly IMessageQueueService _messageQueueService;
 
-        private ILogger<EmailService> _logger { get; }
-        private IHttpClientService _httpClientService { get; }
+        private  ILogger<EmailService> _logger { get; }
 
-        public EmailService(
+        public EmailServiceOld(
             IEmailRepository emailRepository,
             IMapper mapper,
             ILogger<EmailService> logger,
-            IHttpClientService httpClientService
-            )
+            IMessageQueueService messageQueueService)
         {
             _emailRepository = emailRepository;
             _mapper = mapper;
             _logger = logger;
-            _httpClientService = httpClientService;
-
+            _messageQueueService = messageQueueService;
         }
 
         public async Task<IEnumerable<EmailPostParametersResponse>> SendEmailsAsync(List<EmailPostParametersRequest> requests)
@@ -43,8 +41,19 @@ namespace EmailManagement.Application.Services
                 // Salva o e-mail no banco
                 await _emailRepository.SaveAsync(email);
 
-                // Processa o email (envia ou marca como pendente)
-                await ProcessEmailAsync(email, request.Send);
+                // Se a flag 'Send' estiver marcada, tenta enviar o e-mail
+                if (request.Send)
+                {
+                    //await SendEmailAsync(email); // Lógica de envio do e-mail
+
+                    email.MarkAsSent();
+                }
+                else
+                {
+                    email.MarkAsPending();
+                }
+
+                await _emailRepository.UpdateAsync(email);
 
                 // Adiciona a resposta com o status do e-mail
                 var response = new EmailPostParametersResponse
@@ -57,6 +66,7 @@ namespace EmailManagement.Application.Services
 
             return responses;
         }
+        
 
         public Task<bool> DeleteEmailAsync(Guid emailId)
         {
@@ -149,11 +159,6 @@ namespace EmailManagement.Application.Services
             if (!pendingEmails.Any())
                 return 0; // Nenhum e-mail para enviar
 
-            return await ProcessPendingEmails(pendingEmails);
-        }
-
-        private async Task<int> ProcessPendingEmails(IEnumerable<Email> pendingEmails)
-        {
             int sentCount = 0;
 
             foreach (var email in pendingEmails)
@@ -161,7 +166,7 @@ namespace EmailManagement.Application.Services
                 try
                 {
                     // Enfileira o e-mail para envio no RabbitMQ
-                    await _httpClientService.SendEmailToApiAsync(email); // Lógica de envio do e-mail
+                    await _messageQueueService.EnqueueEmail(email);
 
                     // Marca o e-mail como enviado no domínio
                     email.MarkAsSent();
@@ -183,31 +188,5 @@ namespace EmailManagement.Application.Services
             return sentCount;
         }
 
-        private async Task ProcessEmailAsync(Email email, bool sendImmediately)
-        {
-            try
-            {
-                if (sendImmediately)
-                {
-                    // Envia o email imediatamente
-                    await _httpClientService.SendEmailToApiAsync(email);
-                    email.MarkAsSent();
-                }
-                else
-                {
-                    // Marca o email como pendente
-                    email.MarkAsPending();
-                }
-
-                // Atualiza o email no banco de dados
-                await _emailRepository.UpdateAsync(email);
-            }
-            catch(Exception ex)
-            {
-                email.MarkAsError();
-                await _emailRepository.UpdateAsync(email);
-                _logger.LogInformation("Houve uma falha na tentativa de envio");
-            }
-        }
     }
 }

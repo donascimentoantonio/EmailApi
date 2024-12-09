@@ -1,10 +1,7 @@
 ﻿using EmailManagement.Domain.Dtos.v1.Request;
 using EmailManagement.Domain.Dtos.v1.Response;
-using EmailManagement.Domain.Enum;
-using EmailManagement.Domain.Models.Email;
 using EmailManagement.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq.Expressions;
 
 namespace EmailManagement.Api.Controllers.v1
 {
@@ -59,5 +56,63 @@ namespace EmailManagement.Api.Controllers.v1
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Atualizar o email
+        /// </summary>
+        /// <param name="request">Lista de requisições de e-mail</param>
+        /// <param name="id">Email id para atualização</param>
+        /// <returns>Atualizar alguma informação do email</returns>
+        [HttpPut("update")]
+        public async Task<ActionResult<EmailPostParametersResponse>> UpdateEmailAsync(Guid emailId,
+            [FromBody] EmailPostParametersRequest request)
+        {
+            var updatedEmailResponse = await _emailService.UpdateEmailAsync(emailId, request);
+            if (updatedEmailResponse == null)
+            {
+                return NotFound(new { Message = $"Email com ID '{emailId}' não foi encontrado." });
+            }
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Recuperar um e-mail por ID
+        /// </summary>
+        /// <param name="id">ID do e-mail para recuperação</param>
+        /// <returns>Informações detalhadas do e-mail</returns>
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<EmailGetParametersResponse>> GetEmailByIdAsync(Guid emailId)
+        {
+            var emailResponse = await _emailService.GetEmailByIdAsync(emailId);
+
+            if (emailResponse == null)
+            {
+                return NotFound(new { Message = $"Email com ID '{emailId}' não foi encontrado." });
+            }
+
+            return Ok(emailResponse);
+        }
+
+        /// <summary>
+        /// Envia e-mails pendentes
+        /// </summary>
+        /// <returns>Quantidade de e-mails enviados</returns>
+        [HttpPost("send-pending")]
+        public async Task<ActionResult<int>> SendPendingEmailsAsync()
+        {
+            try
+            {
+                //var emailsSentCount = await _emailService.SendPendingEmailsAsync();
+                //return Ok(new { EmailsSent = emailsSentCount });
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                // Log de erro pode ser incluído aqui
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Erro ao enviar e-mails pendentes.", Details = ex.Message });
+            }
+        }
+
     }
 }

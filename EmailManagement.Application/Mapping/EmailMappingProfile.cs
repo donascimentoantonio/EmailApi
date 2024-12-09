@@ -24,7 +24,7 @@ namespace EmailManagement.Application.Mapping
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
             CreateMap<Email, EmailGetParametersResponse>()
-               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()))
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.Value.ToString()))
                .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.Sender))
                .ForMember(dest => dest.Recipients, opt => opt.MapFrom(src => src.Recipients))
                .ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Subject))

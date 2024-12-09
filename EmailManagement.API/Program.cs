@@ -3,6 +3,9 @@ using EmailManagement.IoC;
 using EmailManagement.Api.Middlewares;
 using EmailManagement.Api.Extensions;
 using EmailManagement.Api.Filters;
+using EmailManagement.Domain.Models.Email;
+using EmailManagement.Application.Services;
+using EmailManagement.Domain.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +20,13 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.Configure<EmailApiSettings>(builder.Configuration.GetSection("EmailApi"));
+builder.Services.AddHttpClient<IHttpClientService, HttpClientService>();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddService();
+builder.Services.AddInfra();
 
 //Configuração do serilog
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
