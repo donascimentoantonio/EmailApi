@@ -103,9 +103,8 @@ namespace EmailManagement.Api.Controllers.v1
         {
             try
             {
-                //var emailsSentCount = await _emailService.SendPendingEmailsAsync();
-                //return Ok(new { EmailsSent = emailsSentCount });
-                return Ok();
+                var emailsSentCount = await _emailService.SendPendingEmailsAsync();
+                return Ok(new { EmailsSent = emailsSentCount });
             }
             catch (Exception ex)
             {

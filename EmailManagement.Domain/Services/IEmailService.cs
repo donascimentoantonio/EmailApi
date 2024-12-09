@@ -15,5 +15,6 @@ namespace EmailManagement.Domain.Services
         Task<IEnumerable<EmailGetParametersResponse>> SearchEmailsAsync(SearchEmailFilterRequest filter);
         Task<(IEnumerable<Email>, int)> SearchEmailsWithPaginationAsync(
             Expression<Func<Email, bool>> predicate, int pageNumber, int pageSize);
+        Task<int> SendPendingEmailsAsync();
     }
 }

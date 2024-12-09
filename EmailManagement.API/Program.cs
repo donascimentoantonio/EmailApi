@@ -28,7 +28,6 @@ builder.Services.AddApplication();
 builder.Services.AddService();
 builder.Services.AddInfra();
 
-//Configuração do serilog
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 builder.Services.AddAutoMapper(typeof(Program));
 

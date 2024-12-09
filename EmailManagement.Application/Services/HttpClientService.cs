@@ -25,7 +25,6 @@ namespace EmailManagement.Application.Services
         }
         public async Task SendEmailToApiAsync(Email email)
         {
-
             try
             {
                 if (string.IsNullOrEmpty(_emailApiSettings.BaseUrl))
@@ -42,7 +41,6 @@ namespace EmailManagement.Application.Services
             }
             catch (Exception ex)
             {
-
                 _logger.LogError(ex.Message);
             }
         }
